@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>QR Attendance</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2>QR Attendance System</h2>
+  <form id="attendanceForm">
+    <input type="text" id="name" placeholder="Enter Name" required>
+    <input type="text" id="mobile" placeholder="Enter Mobile" required>
+    <input type="email" id="email" placeholder="Enter Email" required>
+    
+    <!-- Date Auto -->
+    <label>Date (Auto):</label>
+    <input type="text" id="date" disabled>
+    
+    <!-- In-Time Manual -->
+    <label>In-Time (Manual):</label>
+    <input type="time" id="inTime" required>
+    
+    <!-- Topic -->
+    <label>Topic:</label>
+    <input type="text" id="topic" placeholder="Enter Topic" required>
+    
+    <button type="submit">Submit</button>
+  </form>
+  
+  <div id="message"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
