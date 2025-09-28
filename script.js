@@ -4,6 +4,15 @@ window.onload = function () {
   const formattedDate = today.toISOString().split("T")[0]; // yyyy-mm-dd
   document.getElementById("date").value = formattedDate;
 
+  // Auto-fill Out-Time from system
+  function getCurrentTime() {
+    const now = new Date();
+    return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' ,second:'2-digit'});
+  }
+  document.getElementById("outTime").value = getCurrentTime();
+
+
+
   // Handle form submit
   document.getElementById("attendanceForm").addEventListener("submit", function (e) {
     e.preventDefault();
@@ -13,6 +22,7 @@ window.onload = function () {
     const email = document.getElementById("email").value;
     const date = document.getElementById("date").value;
     const inTime = document.getElementById("inTime").value;
+    const outTime = getCurrentTime(); // Get fresh Out-Time at submit
     const topic = document.getElementById("topic").value;
 
     // Status fixed as "Out"
@@ -25,7 +35,7 @@ window.onload = function () {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name, mobile, email, date, inTime, topic, status }),
+      body: JSON.stringify({ name, mobile, email, date, inTime,topic, status }),
     })
       .then(() => {
         document.getElementById("message").innerText = "✅ Submitted Successfully!";
