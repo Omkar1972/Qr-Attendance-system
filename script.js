@@ -79,14 +79,16 @@ window.onload = function () {
 
     // --- In ---
     if (status === "In") {
-      localStorage.setItem(
-        "attendanceData",
-        JSON.stringify({ name, mobile, email, date, inTime: time })
-      );
-      statusField.value = "Out";
-      showMessage(`✅ In-Time recorded successfully at ${time}`, "green");
-      return;
-    }
+  localStorage.setItem(
+    "attendanceData",
+    JSON.stringify({ name, mobile, email, date, inTime: time })
+  );
+
+  // Redirect to success page
+  window.location.href = "success.html";
+
+  return;
+}
 
     // --- Out ---
     if (status === "Out") {
@@ -113,15 +115,22 @@ window.onload = function () {
       fetch("https://script.google.com/macros/s/AKfycbwrjg32NYYolDRp8WfJ85-daCfSfduccRVNwZqQTVABDT_aX_BblGSldz0OYT5q8phn/exec", {
         method: "POST",
         mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "text/plain" }, // Changed to text/plain for better compatibility with no-cors
         body: JSON.stringify(sendData),
-      }).then(() => {
+      })
+      .then(() => {
         // Show Out-Time success only
-        showMessage(`✅ Out-Time recorded successfully at ${outTime}`, "green");
+        showMessage(`✅ Submitted successfully at ${outTime}`, "green");
 
-        // Save today’s completion to prevent re-entry
+        // Save today's completion to prevent re-entry
         localStorage.removeItem("attendanceData");
         localStorage.setItem("lastAttendanceDate", date);
+      })
+      .catch(error => {
+        // Show error message and re-enable form
+        form.style.display = "block";
+        showMessage(`❌ Network error: ${error.message || "Failed to submit out time"}. Please try again.`, "red");
+        console.error("Submission error:", error);
       });
     }
   });
