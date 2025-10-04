@@ -1,77 +1,125 @@
-/* Base (mobile-first) */
-body {
-  font-family: Arial, sans-serif;
-  margin: 15px;
+/* Reset and Base */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
   background: #f4f4f9;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 h2 {
   text-align: center;
-  font-size: 20px;
+  font-size: 22px;
   color: #333;
+  margin-top: 16px;
+  margin-bottom: 10px;
 }
 
-form {
+/* Center Wrapper */
+.form-zoom-wrap {
   width: 100%;
-  max-width: 380px;   /* keeps form compact */
-  margin: auto;
+  display: flex;
+  justify-content: center;
   padding: 15px;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+  box-sizing: border-box;
 }
 
-input, select, button, label {
+/* Card Style */
+.zoom-card {
+  width: 100%;
+  max-width: 480px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 18px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  border: 1px solid rgba(0,0,0,0.08);
+  box-sizing: border-box;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transform-origin: top center;
+}
+
+/* Inputs and Labels */
+.zoom-card input,
+.zoom-card select,
+.zoom-card button,
+.zoom-card label {
   width: 100%;
   margin: 8px 0;
-  padding: 10px;
-  font-size: 14px;
-  box-sizing: border-box;  /* prevents overflow */
+  padding: 12px;
+  font-size: 15px;
+  border-radius: 6px;
+  box-sizing: border-box;
 }
 
-button {
-  background: green;
+.zoom-card input,
+.zoom-card select {
+  border: 1px solid #ccc;
+  background: #fafafa;
+}
+
+/* Disabled Inputs */
+.zoom-card input[disabled] {
+  background: #f1f1f1;
+  color: #555;
+}
+
+/* Focus Style */
+.zoom-card input:focus,
+.zoom-card select:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+/* Button */
+.zoom-card button {
+  background: #0b8a13;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
+  font-size: 15px;
   cursor: pointer;
+  margin-top: 12px;
+}
+.zoom-card button:hover {
+  background: #097d11;
 }
 
-button:hover {
-  background: darkgreen;
-}
+/* Message */
 #message {
   text-align: center;
   margin-top: 15px;
   font-size: 16px;
+  font-weight: bold;
+  color: #2b7a2b;
+  display: none; /* hidden until shown */
 }
 
+/* #message::before {
+  content: "✅";
+} */
 
-/* Tablet screens (≥768px) */
-@media (min-width: 768px) {
-  h2 {
-    font-size: 24px;
+/* ZOOM EFFECT */
+@media (max-width: 540px) {
+  .zoom-card {
+    transform: scale(1.05);
   }
-
-  form {
-    max-width: 500px;
-    padding: 20px;
-  }
-
-  input, select, button, label {
-    font-size: 15px;
-    padding: 12px;
+  .zoom-card:focus-within {
+    transform: scale(1.09);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
   }
 }
 
-/* Desktop screens (≥1024px) */
-@media (min-width: 1024px) {
-  h2 {
-    font-size: 28px;
+@media (min-width: 541px) {
+  .zoom-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 10px 26px rgba(0,0,0,0.1);
   }
-
-  form {
-    max-width: 500px;
+  .zoom-card:focus-within {
+    transform: scale(1.04);
+    box-shadow: 0 12px 36px rgba(0,0,0,0.12);
   }
 }
