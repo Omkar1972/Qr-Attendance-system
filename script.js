@@ -1,7 +1,6 @@
 window.onload = function () {
-  // Auto-fill Date from system
   const today = new Date();
-  const formattedDate = today.toISOString().split("T")[0]; // yyyy-mm-dd
+  const formattedDate = today.toISOString().split("T")[0];
   document.getElementById("date").value = formattedDate;
 
   function getCurrentTime() {
@@ -10,10 +9,25 @@ window.onload = function () {
   }
   document.getElementById("outTime").value = getCurrentTime();
 
-  // Handle form submit
+  // --- Load saved data (localStorage instead of cookies) ---
+  const savedData = JSON.parse(localStorage.getItem("userData"));
+  if (savedData) {
+    // Auto-fill only Name, Mobile, Email, Date
+    document.getElementById("name").value = savedData.name;
+    document.getElementById("mobile").value = savedData.mobile;
+    document.getElementById("email").value = savedData.email;
+    document.getElementById("date").value = formattedDate;
+
+    // Lock them so user doesn't edit again
+    document.getElementById("name").disabled = true;
+    document.getElementById("mobile").disabled = true;
+    document.getElementById("email").disabled = true;
+  }
+
+  // --- Handle Submit ---
   document.getElementById("attendanceForm").addEventListener("submit", function (e) {
-    e.preventDefault();   // stop reload
-    e.stopPropagation();  // extra safety
+    e.preventDefault();
+    e.stopPropagation();
 
     const name = document.getElementById("name").value;
     const mobile = document.getElementById("mobile").value;
@@ -24,23 +38,39 @@ window.onload = function () {
     const topic = document.getElementById("topic").value;
     const status = "Out";
 
-    // Send data to Google Sheets
+    // --- Save only once (first submission) ---
+    if (!localStorage.getItem("userData")) {
+      localStorage.setItem("userData", JSON.stringify({ name, mobile, email }));
+    }
+
+    // --- Send to Google Sheets ---
     fetch("https://script.google.com/macros/s/AKfycbwpatqHSU7XTeRS7Hpstwj7k_1U_xSrHI1klUfB3p4LSQCvoRKsZ4JJZ88t0bDUVgQ/exec", {
       method: "POST",
       mode: "no-cors",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name, mobile, email, date, inTime, topic, status }),
+      body: JSON.stringify({ name, mobile, email, date, inTime, outTime, topic, status }),
     }).then(() => {
-      // ✅ Always show message
       const msg = document.getElementById("message");
       msg.innerText = "Submitted Successfully!";
       msg.style.display = "block";
-      msg.scrollIntoView({ behavior: "smooth", block: "center" }); // force visible
+      msg.scrollIntoView({ behavior: "smooth", block: "center" });
 
-      // reset form
+      // reset only in-time & topic for next entry
       document.getElementById("attendanceForm").reset();
+
+      // restore locked fields again
+      if (savedData || localStorage.getItem("userData")) {
+        const user = JSON.parse(localStorage.getItem("userData"));
+        document.getElementById("name").value = user.name;
+        document.getElementById("mobile").value = user.mobile;
+        document.getElementById("email").value = user.email;
+        document.getElementById("name").disabled = true;
+        document.getElementById("mobile").disabled = true;
+        document.getElementById("email").disabled = true;
+      }
+
       document.getElementById("date").value = formattedDate;
       document.getElementById("outTime").value = getCurrentTime();
     });
