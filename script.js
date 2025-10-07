@@ -74,7 +74,7 @@ window.onload = function () {
 
       // --- Send data to Google Sheets ---
       fetch(
-        "https://script.google.com/macros/s/AKfycbwpatqHSU7XTeRS7Hpstwj7k_1U_xSrHI1klUfB3p4LSQCvoRKsZ4JJZ88t0bDUVgQ/exec",
+        "https://script.google.com/macros/s/AKfycbxELFWf3AYUKX0o3-QVpMHhxFPrq4dSEj2aHg29p87K82JScdPo1cYtjQ7xXfiVrXY/exec",
         {
           method: "POST",
           mode: "no-cors",
