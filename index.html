@@ -12,20 +12,25 @@
   <div class="form-zoom-wrap">
     <form id="attendanceForm" class="zoom-card">
       <input type="text" id="name" placeholder="Enter Name" required>
-      <input type="text" id="mobile" placeholder="Enter Mobile" required>
+      <input type="text" id="mobile" placeholder="Enter Mobile Number" required>
       <input type="email" id="email" placeholder="Enter Email" required>
 
       <label>Date (Auto):</label>
       <input type="text" id="date" disabled>
 
-      <label>In-Time (Manual):</label>
-      <input type="time" id="inTime" required>
+      <label>Current Time (Auto):</label>
+      <input type="text" id="time" disabled>
 
-      <label>Out-Time (Auto):</label>
-      <input type="text" id="outTime" disabled>
 
-      <label>Topic:</label>
-      <input type="text" id="topic" placeholder="Enter Topic" required>
+      <label>Status:</label>
+    <input type="text" id="status" readonly />
+
+      <!-- <label>Status (Select):</label>
+      <select id="status" required>
+        <option value="">-- Select --</option>
+        <option value="In">In</option>
+        <option value="Out">Out</option>
+      </select> -->
 
       <button type="submit">Submit</button>
     </form>

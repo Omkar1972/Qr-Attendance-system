@@ -1,9 +1,16 @@
 window.onload = function () {
+  const form = document.getElementById("attendanceForm");
+  const dateField = document.getElementById("date");
+  const timeField = document.getElementById("time");
+  const statusField = document.getElementById("status");
+  const msgDiv = document.getElementById("message");
+
+  // --- Auto Date ---
   const today = new Date();
   const formattedDate = today.toISOString().split("T")[0];
-  document.getElementById("date").value = formattedDate;
+  dateField.value = formattedDate;
 
-  // Function to get current time (for Out-Time)
+  // --- Auto Time ---
   function getCurrentTime() {
     const now = new Date();
     return now.toLocaleTimeString([], {
@@ -12,13 +19,12 @@ window.onload = function () {
       second: "2-digit",
     });
   }
-  document.getElementById("outTime").value = getCurrentTime();
+  setInterval(() => {
+    timeField.value = getCurrentTime();
+  }, 1000);
 
-  const messageBox = document.getElementById("message");
-  const savedUser = JSON.parse(localStorage.getItem("userData"));
-  const lastSubmission = JSON.parse(localStorage.getItem("lastSubmission"));
-
-  // --- Auto-fill saved user info every day ---
+  // --- Load Saved User ---
+  const savedUser = JSON.parse(localStorage.getItem("userInfo"));
   if (savedUser) {
     document.getElementById("name").value = savedUser.name;
     document.getElementById("mobile").value = savedUser.mobile;
@@ -29,77 +35,94 @@ window.onload = function () {
   }
 
   // --- Check if already submitted today ---
-  if (lastSubmission && lastSubmission.date === formattedDate) {
-    messageBox.innerText = "You have already submitted today's attendance!";
-    messageBox.style.display = "block";
-    document.getElementById("attendanceForm").style.display = "none";
+  const lastAttendanceDate = localStorage.getItem("lastAttendanceDate");
+  if (lastAttendanceDate === formattedDate) {
+    form.style.display = "none";
+    showMessage("✅ You already submitted your attendance for today.", "blue");
     return;
-  } else {
-    // New day — show form again
-    document.getElementById("attendanceForm").style.display = "block";
-
-    // Auto-fill only saved user info
-    if (savedUser) {
-      document.getElementById("name").value = savedUser.name;
-      document.getElementById("mobile").value = savedUser.mobile;
-      document.getElementById("email").value = savedUser.email;
-      document.getElementById("name").disabled = true;
-      document.getElementById("mobile").disabled = true;
-      document.getElementById("email").disabled = true;
-    }
-
-    // Clear manual fields (in-time & topic) for the new day
-    document.getElementById("inTime").value = "";
-    document.getElementById("topic").value = "";
   }
 
-  // --- Handle Submit ---
-  document
-    .getElementById("attendanceForm")
-    .addEventListener("submit", function (e) {
-      e.preventDefault();
-      e.stopPropagation();
+  // --- Default Status ---
+  const storedAttendance = JSON.parse(localStorage.getItem("attendanceData"));
+  statusField.value =
+    storedAttendance && storedAttendance.date === formattedDate ? "Out" : "In";
 
-      const name = document.getElementById("name").value;
-      const mobile = document.getElementById("mobile").value;
-      const email = document.getElementById("email").value;
-      const date = document.getElementById("date").value;
-      const inTime = document.getElementById("inTime").value;
-      const outTime = getCurrentTime();
-      const topic = document.getElementById("topic").value;
-      const status = "Out";
+  // --- Message Function ---
+  function showMessage(text, color) {
+    msgDiv.style.display = "block";
+    msgDiv.innerText = text;
+    msgDiv.style.color = color;
+    msgDiv.style.opacity = "1";
+  }
 
-      // Save user info for auto-fill next day
-      localStorage.setItem("userData", JSON.stringify({ name, mobile, email }));
+  // --- Submit Handler ---
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
 
-      // --- Send data to Google Sheets ---
-      fetch(
-        "https://script.google.com/macros/s/AKfycbxELFWf3AYUKX0o3-QVpMHhxFPrq4dSEj2aHg29p87K82JScdPo1cYtjQ7xXfiVrXY/exec",
-        {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name,
-            mobile,
-            email,
-            date,
-            inTime,
-            outTime,
-            topic,
-            status,
-          }),
-        }
-      ).then(() => {
-        // Save today’s submission date
-        localStorage.setItem("lastSubmission", JSON.stringify({ date }));
+    const name = document.getElementById("name").value.trim();
+    const mobile = document.getElementById("mobile").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const date = dateField.value;
+    const time = timeField.value;
+    const status = statusField.value;
 
-        // Success message
-        messageBox.innerText = "✅ Submitted Successfully!";
-        messageBox.style.display = "block";
+    if (!savedUser) {
+      localStorage.setItem("userInfo", JSON.stringify({ name, mobile, email }));
+    }
 
-        // Hide form after submission
-        document.getElementById("attendanceForm").style.display = "none";
+    // --- Prevent double In ---
+    const lastDate = localStorage.getItem("lastAttendanceDate");
+    if (lastDate === date && status === "In") {
+      showMessage("⚠️ Attendance already recorded for today.", "red");
+      return;
+    }
+
+    // --- In ---
+    if (status === "In") {
+      localStorage.setItem(
+        "attendanceData",
+        JSON.stringify({ name, mobile, email, date, inTime: time })
+      );
+      statusField.value = "Out";
+      showMessage(`✅ In-Time recorded successfully at ${time}`, "green");
+      return;
+    }
+
+    // --- Out ---
+    if (status === "Out") {
+      const stored = JSON.parse(localStorage.getItem("attendanceData"));
+      if (!stored) {
+        showMessage("⚠️ Please mark In first!", "red");
+        return;
+      }
+
+      const outTime = time;
+      const sendData = {
+        name: stored.name,
+        mobile: stored.mobile,
+        email: stored.email,
+        date: stored.date,
+        inTime: stored.inTime,
+        outTime: outTime,
+      };
+
+      // Hide form immediately
+      form.style.display = "none";
+
+      // Send to Google Sheet
+      fetch("https://script.google.com/macros/s/AKfycbwrjg32NYYolDRp8WfJ85-daCfSfduccRVNwZqQTVABDT_aX_BblGSldz0OYT5q8phn/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(sendData),
+      }).then(() => {
+        // Show Out-Time success only
+        showMessage(`✅ Out-Time recorded successfully at ${outTime}`, "green");
+
+        // Save today’s completion to prevent re-entry
+        localStorage.removeItem("attendanceData");
+        localStorage.setItem("lastAttendanceDate", date);
       });
-    });
+    }
+  });
 };
